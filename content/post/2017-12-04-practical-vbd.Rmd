@@ -1,0 +1,195 @@
+---
+title: 'Vector Borne diseases: building a simple model'
+author: "Zulma Cucunubá, Pierre Nouvellet"
+categories: ["practicals"]
+tags: ["Rmarkdown"]
+image: img/highres/siv-vbd.jpg
+date: 2017-12-04T14:00:00-00:00
+---
+
+```{r options, include = FALSE, message = FALSE, warning = FALSE, error = FALSE}
+library(knitr)
+
+opts_chunk$set(collapse = TRUE)
+
+```
+
+
+This practical aims to illustrate the basics of **vector borne disease modelling**
+using R, with an emphasis on how the methods work. We will use a basic model for Zika infection as an example. In this practical we will begin by gaining some understanding of the components which contribute to R0 and how potential interventions influence transmission. Later in the practical you will construct a model of Zika transmission to look at the effects of seasonal variation, change on basica parameters and estimating R0.
+
+
+
+# Introduction
+
+## Vector borne diseases transmission models
+
+
+
+
+
+## Required packages
+
+
+
+```{r eval=FALSE}
+#install.packages("deSolve", dep=TRUE)
+```
+
+Then load the packages using:
+```{r}
+library(deSolve)
+library(ggplot2)
+```
+
+## The model
+
+In this section, please make a diagram of the vector transmission model that includes
+- Sh : Susceptible Humans
+- Ih : Ingected/Infectious humans
+- Rh : humans recovered from infection (with lifelasting immunity)
+- Sv : Susceptible vectors
+- Iv : Infected vectors
+
+
+
+## The parameters
+
+Please fill in the parameters for complityng the model
+
+```{r, eval = FALSE}
+#Parameters (adapted to Zika)
+a=0.45        # bitting rate
+b=0.086       # vector competence (0-1) Probability of transmission from vector to human, per bite
+r=0.00118     # percapita rate of host recovery
+c=0.47        # Probability of transmission from human to vector, per bite
+deltaT=15     # extrinsec incubation period 
+V=20000       # total vectors
+H=10000       # total humans
+m= (V/H)      # vector per human ratio
+p=0.819       # daily survival of mosquitos
+muv=-log(p)   # mosquito mortality
+muh=4.5/1000  # human mortality
+#p^deltaT =   exp(-muv*deltaT) # (Fraction of mosquitos that survive sporogony)
+Dh= 1/r       # duration of infectiousness
+Lv= 1/muv     # life expectancy of vectors
+
+
+```
+
+
+## The model
+
+
+
+```{r}
+
+
+model <- function (t, x, params) {
+  Sh <- x[1]    #Susceptible humans
+  Yh <- x[2]    #Infected humans
+  Sv <- x[3]    #Susceptible vectors
+  Yv <- x[4]    #Infected vectors
+  with(as.list(params), #local environment to evaluate derivatives
+
+{
+  dSh= muh*H-m*a*b*Yv*(Sh/H)+r*Yh-muh*Sh            # (eqn 1)
+  dYh=       m*a*b*Yv*(Sh/H)-(r+muh)*Yh             # (eqn 2)
+  dSv= muv*V-a*c*exp(-muv*deltaT)*Sv*(Yh/H)-muv*Sv  # (eqn 3)
+  dYv=       a*c*exp(-muv*deltaT)*Sv*(Yh/H)-muv*Yv  # (eqn 4)
+  dx <- c(dSh,dYh,dSv,dYv)
+  list(dx)
+}
+)
+}
+
+
+
+```
+
+
+
+<!-- ```{r} -->
+<!-- Change=1   # Changing parameter 'r' from a sequence (sr) -->
+<!-- sr=seq(0.00118,0.0134,length.out=10) -->
+<!-- times <- seq(1,365*50,by=365) -->
+<!-- params <- c(a= 0.45,  -->
+<!--             bh=0.086, -->
+<!--             r= sr[Change], -->
+<!--             bv=0.47, -->
+<!--             p=0.819,      -->
+<!--             muv=-log(p),  -->
+<!--             muh=4.5/1000, -->
+<!--             deltaT=15, -->
+<!--             V=20000, -->
+<!--             H=10000, -->
+<!--             m= (V/H), -->
+<!--             C= (a*b)/H, -->
+<!--             D= (a*c*exp(-muv*deltaT)/H))  -->
+
+<!-- xstart<- c(Sh=1,Yh=1,Sv=1,Yv=1) -->
+
+<!-- out <- as.data.frame(ode(xstart,times,model,params)) -->
+
+
+<!-- ``` -->
+
+
+
+
+
+
+<!-- ## Estimating R0 -->
+
+
+
+<!-- ```{r fig.width = 8} -->
+<!-- # Basic Reproduction Number (Homogeneous mixing) -->
+<!-- HomoRo = m*(a^2)*b*c*exp(-muv*deltaT)/(muv*r) -->
+<!-- HomoR0 = m*(a^2)*b*c*exp(-muv*deltaT)*Dh*Lv -->
+
+
+<!-- ``` -->
+
+
+
+<!-- ## Plotting results -->
+
+
+
+<!-- ```{r molecular-clock} -->
+<!-- par(mfrow=c(1,2)) -->
+<!-- plot(out$time, out$Yh, main="Humans",col="red",  -->
+<!--     cex=.7,ylab="Number of Infected humans",xlab="Time (days)", type="l") -->
+<!-- #legend("topleft", legend=sr[Change], title = "'r' recovery rate",cex=.7) -->
+<!-- plot(out$time, out$Yv, main="Vectors",col="blue",  -->
+<!--      cex=.7,ylab="Number of Infected vectors",xlab="Time (days)", type="l") -->
+<!-- #legend("topleft", legend=HomoRo, title = "Ro", cex=.7) -->
+
+
+<!-- ``` -->
+
+
+
+
+     
+	   
+# About this document
+
+## Contributors
+
+- Zulma Cucunuba: initial version
+
+Contributions are welcome via [pull requests](https://github.com/reconhub/learn/pulls). The source file if this document can be found [**here**](https://raw.githubusercontent.com/reconhub/learn/master/content/post/2017-12-04-practical-vbd.Rmd).
+
+
+
+## Legal stuff
+
+**License**: [CC-BY](https://creativecommons.org/licenses/by/3.0/)
+**Copyright**: Zulma Cucunuba & Pierre Nouvellet, 2017
+
+
+
+# References
+
