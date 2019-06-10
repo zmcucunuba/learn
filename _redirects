@@ -1,0 +1,9 @@
+/categories/ /categories.html 301
+/categories/* /categories/:splat.html 301
+/tags/ /tags.html 301
+/tags/* /tags/:splat.html 301
+/licenses/ /licenses.html 301
+/licenses/* /licenses/:splat.html 301
+
+# Redirect default Netlify subdomain to primary domain
+https://reconlearn.netlify.com/* https://www.reconlearn.org/:splat 301!
